@@ -10,7 +10,6 @@ module Git.Pack.Packfile (
 ) where
 
 
-import Control.Applicative
 import Data.ByteString (ByteString)
 import qualified Data.Iteratee          as It
 import Data.Iteratee.Binary
@@ -47,8 +46,8 @@ data PackObjectType =   OBJ_BAD | -- -1
                         OBJ_TREE |  -- 2
                         OBJ_BLOB | -- 3
                         OBJ_TAG | -- 4
-                        OBJ_OFS_DELTA Int | -- 6 -- offset is interpreted as a negative offset from the type-byte of the header of the ofs-delta entry 
-                        OBJ_REF_DELTA [Word8] | 
+                        OBJ_OFS_DELTA Int | -- 6 -- offset is interpreted as a negative offset from the type-byte of the header of the ofs-delta entry
+                        OBJ_REF_DELTA [Word8] |
                         OBJ_ANY |
                         OBJ_MAX deriving (Eq, Show, Ord) -- 7
 
@@ -108,7 +107,7 @@ toPackObjectType 4  = return $ Just OBJ_TAG
 toPackObjectType 6  = do
     offset <- readOffset 0 0
     return $ Just (OBJ_OFS_DELTA offset)
-toPackObjectType 7  = do 
+toPackObjectType 7  = do
     baseObj <- replicateM 20 It.head -- 20-byte base object name SHA1
     return $ Just (OBJ_REF_DELTA baseObj)
 toPackObjectType _  = return Nothing

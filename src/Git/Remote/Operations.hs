@@ -1,4 +1,4 @@
-{-# LANGUAGE OverloadedStrings, BangPatterns, RecordWildCards #-}
+{-# LANGUAGE OverloadedStrings, BangPatterns, RecordWildCards, FlexibleContexts #-}
 
 -- | Provide a number of high level commands/operations like clone or
 -- ls-remote.
@@ -12,12 +12,12 @@ module Git.Remote.Operations (
   , parseRemote
 ) where
 
-import qualified Data.Attoparsec.Char8 as AC
+import qualified Data.Attoparsec.ByteString.Char8 as AC
 import Data.Attoparsec.Combinator
 import qualified Data.ByteString as B
 import qualified Data.ByteString.Char8 as C
 import qualified Data.ByteString.Lazy as L
-import Control.Applicative                      ((<$>))
+--import Control.Applicative                      ((<$>))
 import Control.Monad.Reader                     (runReaderT)
 import System.Directory                         (removeFile, createDirectoryIfMissing)
 import System.FilePath                          ((</>), takeFileName, dropExtension)
@@ -53,8 +53,8 @@ data Remote = Remote {
 parseRemote :: B.ByteString -> Maybe Remote
 parseRemote = eitherToMaybe . AC.parseOnly parser
     where parser = do
-            host <- "git://" AC..*> domain
-            port <- option Nothing (Just <$> (":" AC..*> AC.decimal))
+            host <- "git://" *> domain
+            port <- option Nothing (Just <$> (":" *> AC.decimal))
             slash
             repo <- AC.takeByteString
             return $ Remote (C.unpack host) port (C.unpack repo)

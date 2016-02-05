@@ -12,6 +12,7 @@ import Prelude hiding (take, takeWhile)
 import qualified Data.ByteString.Char8 as C
 import qualified Data.ByteString as B
 import qualified Data.ByteString.Lazy as L
+import qualified Data.ByteString.Lazy.Internal as L   (ByteString(Chunk) ,chunk)
 import qualified Codec.Binary.UTF8.String as CS (encode)
 import qualified Crypto.Hash.SHA1 as SHA1
 import Data.Char                             (ord)
@@ -143,17 +144,38 @@ instance Binary IndexEntry where
 readIndex :: FilePath -> IO [IndexEntry]
 readIndex fullPath = do
     content <- L.readFile fullPath
-    (_, _, num) <- return $ runGet readHeader content
+    (_, _, _) <- return $ runGet readHeader content
+    return $ go decoder (L.drop 12 content)
+    where
+      decoder = runGetIncremental readIndexEntry
+      go (Done leftover _consumed entry) input =
+        entry : go decoder (L.chunk leftover input)
+      go (Partial k) input =
+        go (k . takeHeadChunk $ input) (dropHeadChunk input)
+      go (Fail _leftover _consumed msg) _input =
+        error msg
+      readHeader = do
+        magic   <- getWord32be
+        version <- getWord32be
+        num     <- getWord32be
+        return (magic, version, num)
+      takeHeadChunk :: L.ByteString -> Maybe B.ByteString
+      takeHeadChunk lbs =
+        case lbs of
+          (L.Chunk bs _) -> Just bs
+          _ -> Nothing
+      dropHeadChunk :: L.ByteString -> L.ByteString
+      dropHeadChunk lbs =
+        case lbs of
+          (L.Chunk _ lbs') -> lbs'
+          _ -> L.empty
+{-
     return $ readMany [] (L.drop 12 content) 0 num
     where readMany acc remaining' offset toRead | toRead > 0 = do
-            (ie, bs, consumed) <- return $ runGetState readIndexEntry remaining' offset
+            (ie, bs, consumed) <- return $ runGetIncremental readIndexEntry remaining' offset
             readMany (ie : acc) bs (consumed+offset) (toRead-1)
           readMany acc _ _ _ = acc
-          readHeader = do
-            magic   <- getWord32be
-            version <- getWord32be
-            num     <- getWord32be
-            return (magic, version, num)
+-}
 
 
 {-

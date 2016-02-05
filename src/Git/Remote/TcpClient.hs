@@ -13,7 +13,7 @@ import qualified Data.ByteString.Char8 as C
 import qualified Data.ByteString as B
 import Network.Socket hiding                    (recv, send)
 import Network.Socket.ByteString                (recv, sendAll)
-import Data.Monoid                              (mempty, mappend)
+--import Data.Monoid                              (mempty, mappend)
 import Numeric                                  (readHex)
 
 withConnection :: HostName -> ServiceName -> (Socket -> IO b) -> IO b
@@ -71,7 +71,7 @@ openConnection host port = do
         connect sock (addrAddress serveraddr)
         return sock
 
--- | Read a git packet line (variable length binary string prefixed with the overall length). 
+-- | Read a git packet line (variable length binary string prefixed with the overall length).
 -- Length is 4 byte, hexadecimal, padded with 0.
 readPacketLine :: Socket -> IO (Maybe C.ByteString)
 readPacketLine sock = do

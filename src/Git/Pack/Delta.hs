@@ -33,7 +33,7 @@ module Git.Pack.Delta (
 import qualified Data.ByteString as B
 import Data.Binary.Strict.Get
 import Control.Monad                    (liftM, foldM)
-import Data.Bits                        (Bits, (.&.), (.|.), shiftL)
+import Data.Bits                        ((.&.), (.|.), shiftL)
 import Git.Common                       (isMsbSet)
 import System.Environment               (getArgs)
 import Data.Word

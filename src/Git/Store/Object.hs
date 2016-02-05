@@ -134,12 +134,12 @@ Remove git INSTALL instructions
 -}
 commitParser :: Parser Commit
 commitParser = do
-    tree <- "tree " .*> take 40
+    tree <- "tree " *> take 40
     space
     parents <- many' parseParentCommit
-    author <- "author " .*> parsePerson
+    author <- "author " *> parsePerson
     space
-    commiter <- "committer " .*> parsePerson
+    commiter <- "committer " *> parsePerson
     space
     space
     message <- takeByteString
@@ -149,14 +149,14 @@ commitParser = do
 
 parseParentCommit :: Parser C.ByteString
 parseParentCommit = do
-   parent <- "parent " .*> take 40
+   parent <- "parent " *> take 40
    space
    return parent
 
 parsePerson :: Parser Person
 parsePerson = do
     name <- takeWhile (/= '<')
-    email <- "<" .*> takeWhile (/= '>') <*. ">"
+    email <- "<" *> takeWhile (/= '>') <* ">"
     date <- takeTill (== '\n')
     return $ Person name email date
 

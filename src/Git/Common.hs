@@ -38,7 +38,7 @@ toHex x = showHex x ""
 
 -- | Create a packet line prefixed with the overall length. Length is 4 byte,
 -- hexadecimal, padded with 0.
-pktLine :: String -> String 
+pktLine :: String -> String
 pktLine = printf "%04s%s" =<< toHex . (4 +) . length
 
 -- | Return the Git flush packet.
@@ -46,7 +46,7 @@ flushPkt :: String
 flushPkt = "0000"
 
 -- | Check whether the most significant bit of an octet is set.
-isMsbSet :: Bits a => a -> Bool
+isMsbSet :: (Num a) => Bits a => a -> Bool
 isMsbSet x = (x .&. 0x80) /= 0
 
 eitherToMaybe :: Either e a -> Maybe a

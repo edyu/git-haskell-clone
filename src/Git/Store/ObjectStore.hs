@@ -1,4 +1,4 @@
-{-# LANGUAGE OverloadedStrings, RecordWildCards, DoAndIfThenElse #-}
+{-# LANGUAGE OverloadedStrings, RecordWildCards, DoAndIfThenElse, FlexibleContexts #-}
 
 module Git.Store.ObjectStore (
     createEmptyGitRepository
@@ -178,7 +178,7 @@ createRefs refs = do
     where simpleRefName  = head . reverse . C.split '/'
           isPeeledTag    = C.isSuffixOf "^{}" . getRefName
           isTag          = (\e -> (not . C.isSuffixOf "^{}" $ getRefName e) && (C.isPrefixOf "refs/tags" $ getRefName e))
-          writeRefs refSpace     = mapM_ (\Ref{..} -> createRef (refSpace ++ "/" ++ (C.unpack . simpleRefName $ getRefName)) (C.unpack getObjId)) 
+          writeRefs refSpace     = mapM_ (\Ref{..} -> createRef (refSpace ++ "/" ++ (C.unpack . simpleRefName $ getRefName)) (C.unpack getObjId))
 
 createRef :: String -> String -> WithRepository ()
 createRef ref sha = do
